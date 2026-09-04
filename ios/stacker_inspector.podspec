@@ -11,16 +11,16 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'stacker_inspector'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'Debug-only network, crash and memory inspector for Flutter.'
   s.description      = <<-DESC
 Stacker records API calls, crashes and memory leaks and shows them in a
 Chucker-style dashboard. Capture, the dashboard launcher and all timers are
 disabled in release builds.
                        DESC
-  s.homepage         = 'https://github.com/YOUR_USERNAME/stacker'
+  s.homepage         = 'https://github.com/jatinsinghsatija/Stacker'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Stacker' => 'YOUR_EMAIL' }
+  s.author           = { 'Jatin Singh Satija' => 'jatinsinghsatija@users.noreply.github.com' }
   s.source           = { :path => '.' }
   s.source_files     = 'stacker/Sources/stacker/**/*.swift'
   s.dependency 'Flutter'

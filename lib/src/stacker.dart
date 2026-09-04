@@ -59,6 +59,21 @@ abstract final class Stacker {
   /// Whether [init] has run.
   static bool get isInitialised => _initialised;
 
+  /// Forces the capture flag, for widget tests only.
+  ///
+  /// A widget test cannot call [init]: it awaits platform-channel calls, and
+  /// `testWidgets` runs under fake async where the real `Timer` backing their
+  /// timeout never fires, so the future never completes. A test that needs the
+  /// overlay should register the container with `StackerLocator.setUp` and
+  /// then call this to flip the flag the widgets read.
+  ///
+  /// Never call this from application code — use [init].
+  @visibleForTesting
+  static void debugSetEnabledForTesting(bool value) {
+    _enabled = value;
+    _initialised = value;
+  }
+
   /// Initialises the library.
   ///
   /// Safe to call in a release build — it becomes a no-op. Calling it twice

@@ -40,7 +40,9 @@ jitpack.yml
 .DS_Store
 
 # Native-iOS release artifacts and the native-iOS podspec. Flutter apps
-# installing from pub.dev use ios/stacker.podspec, not the root Stacker.podspec.
+# installing from pub.dev consume ios/stacker_inspector.podspec through the
+# Flutter tool; the root podspec is only for native Xcode projects and would
+# be dead weight in the pub archive.
 dist/
-Stacker.podspec
+StackerInspector.podspec
 RELEASE.md

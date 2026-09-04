@@ -49,26 +49,56 @@ flutter pub get
 # --no-codesign: the frameworks are signed by the *consuming* app at its own
 # build time. Signing them here would embed this machine's identity and break
 # every other developer's build.
-echo "==> Building XCFrameworks (compiles the Dart dashboard to AOT)"
+# Both Debug and Release sets are built, and both are shipped.
+#
+# This is not belt-and-braces: `--no-debug` alone produces a Release set whose
+# *simulator* slice has no Dart code in it at all. Measured on the real output:
+#
+#   Release / ios-arm64                  App = 5.3 MB, 4 snapshot symbols
+#   Release / ios-arm64_x86_64-simulator App =  82 KB, 0 snapshot symbols
+#
+# Apple's AOT compiler does not target the simulator, so a Release-only bundle
+# fails on every simulator with
+# "[ERROR:flutter/shell/common/engine.cc] Engine run configuration was invalid"
+# and renders a black, unsized view. The Debug (JIT) set carries a
+# kernel_blob.bin for both slices and works on the simulator.
+#
+# The podspec therefore vends Debug frameworks for the host's Debug
+# configuration and Release for Release, which is also the right split for
+# binary size in a shipped app.
+echo "==> Building XCFrameworks (Debug JIT + Release AOT)"
 (cd stacker_host && flutter build ios-framework \
     --no-profile \
-    --no-debug \
     --no-codesign \
     --output=build/ios-framework)
 
-SRC="stacker_host/build/ios-framework/Release"
-for fw in Flutter App FlutterPluginRegistrant stacker_inspector; do
-  if [ ! -d "${SRC}/${fw}.xcframework" ]; then
-    echo "!! Missing ${SRC}/${fw}.xcframework" >&2
-    exit 1
-  fi
+for cfg in Debug Release; do
+  SRC="stacker_host/build/ios-framework/${cfg}"
+  for fw in Flutter App FlutterPluginRegistrant stacker_inspector; do
+    if [ ! -d "${SRC}/${fw}.xcframework" ]; then
+      echo "!! Missing ${SRC}/${fw}.xcframework" >&2
+      exit 1
+    fi
+  done
 done
 
+# Guard the exact defect this script was changed to fix: if a future Flutter
+# version stops shipping simulator Dart code in the Debug set, fail here
+# rather than publishing an artifact that black-screens on every simulator.
+BLOB="stacker_host/build/ios-framework/Debug/App.xcframework/ios-arm64_x86_64-simulator/App.framework/flutter_assets/kernel_blob.bin"
+if [ ! -s "${BLOB}" ]; then
+  echo "!! Debug simulator slice has no kernel_blob.bin." >&2
+  echo "!! The dashboard would fail to launch on any simulator." >&2
+  exit 1
+fi
+
 echo "==> Staging the bundle"
-# The podspec's vendored_frameworks paths are "Release/<name>.xcframework",
-# so that directory name is part of the archive's contract.
-mkdir -p "${STAGE}/Release"
-cp -R "${SRC}/." "${STAGE}/Release/"
+# The podspec's vendored_frameworks paths include the configuration directory,
+# so these names are part of the archive's contract.
+for cfg in Debug Release; do
+  mkdir -p "${STAGE}/${cfg}"
+  cp -R "stacker_host/build/ios-framework/${cfg}/." "${STAGE}/${cfg}/"
+done
 
 # CocoaPods resolves `s.license` and `s.resource_bundles` against the unpacked
 # archive, so both files have to travel inside the zip.

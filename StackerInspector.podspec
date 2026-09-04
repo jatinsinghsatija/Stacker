@@ -17,7 +17,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'StackerInspector'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'Debug-only network, crash and memory inspector for native iOS.'
   s.description      = <<-DESC
 Stacker records API calls, crashes and memory leaks and shows them in a
@@ -28,9 +28,9 @@ Open the dashboard by shaking the device or tapping the floating bubble.
 Capture is off until StackerAutoAttach.enable() is called, which you should
 guard with #if DEBUG.
                        DESC
-  s.homepage         = 'https://github.com/YOUR_USERNAME/stacker'
+  s.homepage         = 'https://github.com/jatinsinghsatija/Stacker'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'StackerInspector' => 'YOUR_EMAIL' }
+  s.author           = { 'Jatin Singh Satija' => 'jatinsinghsatija@users.noreply.github.com' }
 
   s.platform              = :ios, '13.0'
   s.swift_version         = '5.0'
@@ -39,30 +39,48 @@ guard with #if DEBUG.
   # The release asset. `:http` with a .zip makes CocoaPods download, unpack
   # and cache it — the frameworks are never committed to git.
   s.source = {
-    :http => 'https://github.com/YOUR_USERNAME/stacker/releases/download/v0.1.0/StackerInspector-iOS-XCFrameworks-0.1.0.zip'
+    :http => 'https://github.com/jatinsinghsatija/Stacker/releases/download/v0.2.0/StackerInspector-iOS-XCFrameworks-0.2.0.zip'
   }
 
-  # The Release frameworks are vendored for every host configuration,
-  # including the host app's Debug builds.
+  # Frameworks are vended per configuration, and this split is load-bearing.
   #
-  # Debug and Release Flutter artifacts are not interchangeable: the Debug set
-  # is a JIT engine (38 MB) plus a `kernel_blob.bin` Dart snapshot in
-  # `flutter_assets` (55 MB), while the Release set is an AOT engine (8.8 MB)
-  # with the Dart compiled into `App` and no kernel blob (140 KB of assets).
-  # Mixing an engine with the wrong snapshot type fails at launch. Measured
-  # from the actual build output, not assumed.
+  # `flutter build ios-framework` does NOT produce simulator Dart code in its
+  # Release output — Apple's AOT compiler does not target the simulator.
+  # Measured on the real build:
   #
-  # Release is the right choice here because the dashboard is Stacker's own
-  # code and is never hot-reloaded by the host developer. It also keeps the
-  # download ~90 MB smaller. Stacker's debug gating comes from
-  # StackerAutoAttach.enable(), not from which engine is linked, so nothing is
-  # lost. See RELEASE.md if you need the Debug set for dashboard development.
-  s.vendored_frameworks = [
-    'Release/Flutter.xcframework',
-    'Release/App.xcframework',
-    'Release/FlutterPluginRegistrant.xcframework',
-    'Release/stacker_inspector.xcframework'
-  ]
+  #   Release / ios-arm64                  App = 5.3 MB, 4 snapshot symbols
+  #   Release / ios-arm64_x86_64-simulator App =  82 KB, 0 snapshot symbols
+  #
+  # Shipping Release for every configuration therefore black-screens on every
+  # simulator with "Engine run configuration was invalid". The Debug (JIT) set
+  # carries a kernel_blob.bin for both slices and runs on the simulator, so a
+  # host's Debug configuration gets Debug frameworks.
+  #
+  # This also happens to be the right size trade-off: the Debug set is larger
+  # (a 43 MB kernel blob) but only ever linked into debug builds, and Stacker
+  # is a debug tool.
+  s.subspec 'Debug' do |d|
+    d.vendored_frameworks = [
+      'Debug/Flutter.xcframework',
+      'Debug/App.xcframework',
+      'Debug/FlutterPluginRegistrant.xcframework',
+      'Debug/stacker_inspector.xcframework'
+    ]
+  end
+
+  s.subspec 'Release' do |r|
+    r.vendored_frameworks = [
+      'Release/Flutter.xcframework',
+      'Release/App.xcframework',
+      'Release/FlutterPluginRegistrant.xcframework',
+      'Release/stacker_inspector.xcframework'
+    ]
+  end
+
+  # Debug is the default subspec: Stacker is a debug tool, and a host that
+  # pins `:configurations => ['Debug']` (as the README recommends) needs the
+  # simulator-capable set.
+  s.default_subspecs = 'Debug'
 
   s.frameworks = 'UIKit', 'Foundation'
 

@@ -102,6 +102,7 @@ import Foundation
     ) {
         guard StackerBridge.shared.isEnabled else { return }
         let nsError = error as NSError
+        StackerToast.showCrash(errorType: nsError.domain, fatal: false)
         var payload: [String: Any] = [
             "id": "ios-crash-\(UUID().uuidString)",
             "timestamp": Int(Date().timeIntervalSince1970 * 1000),
@@ -120,6 +121,7 @@ import Foundation
     private static func report(exception: NSException) {
         guard StackerBridge.shared.isEnabled else { return }
         let name = exception.name.rawValue
+        StackerToast.showCrash(errorType: name, fatal: true)
         let reason = exception.reason ?? ""
         StackerBridge.shared.sendCrash([
             "id": "ios-crash-\(UUID().uuidString)",

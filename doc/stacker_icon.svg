@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 108 108" role="img" aria-label="Stacker icon: three stacked plates under a magnifier">
+  <title>Stacker</title>
+  <desc>Three offset blue plates stacked in perspective with a white magnifier resting on the top plate, on a dark rounded background.</desc>
+
+  <!-- Geometry is copied verbatim from the Android launcher icon
+       (android/src/main/res/drawable/ic_stacker_launcher.xml) so the README
+       and the icon a developer sees on their home screen are the same mark. -->
+  <path fill="#0B1220" d="M12,0 L96,0 A12,12 0 0,1 108,12 L108,96 A12,12 0 0,1 96,108 L12,108 A12,12 0 0,1 0,96 L0,12 A12,12 0 0,1 12,0 Z"/>
+
+  <path fill="#1A3A8F" d="M54,86 L20,72 L54,58 L88,72 Z"/>
+  <path fill="#2962FF" d="M54,69 L25,57 L54,45 L83,57 Z"/>
+  <path fill="#5B8DEF" d="M54,52 L30,42 L54,32 L78,42 Z"/>
+
+  <circle fill="#FFFFFF" cx="58" cy="26" r="9.5"/>
+  <circle fill="#2962FF" cx="58" cy="26" r="6"/>
+  <path fill="#FFFFFF" d="M64.5,32.5 L72,40 L68.4,43.6 L60.9,36.1 Z"/>
+</svg>

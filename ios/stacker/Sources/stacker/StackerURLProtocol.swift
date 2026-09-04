@@ -199,6 +199,19 @@ import Foundation
         }
 
         StackerBridge.shared.sendApi(payload)
+
+        // Per-call toast for native hosts. In a Flutter app `StackerOverlay`
+        // draws these, but a native app has no Flutter widget tree on screen,
+        // so the toast has to come from UIKit. No-op unless the host called
+        // StackerAutoAttach.enable().
+        StackerToast.showApiCall(
+            method: request.httpMethod ?? "GET",
+            path: request.url?.path ?? "",
+            statusCode: response?.statusCode as NSNumber?,
+            durationMs: NSNumber(
+                value: Int(Date().timeIntervalSince(requestTime) * 1000)
+            )
+        )
     }
 
     private func requestBodyString() -> String? {

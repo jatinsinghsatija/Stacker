@@ -77,6 +77,9 @@ object StackerCrashHandler {
     ) {
         if (!StackerBridge.isEnabled) return
         runCatching {
+            StackerToast.showCrash(throwable.javaClass.simpleName, fatal = false)
+        }
+        runCatching {
             StackerBridge.sendCrash(
                 payloadOf(
                     throwable = throwable,
@@ -91,6 +94,11 @@ object StackerCrashHandler {
 
     private fun report(thread: Thread, throwable: Throwable) {
         if (!StackerBridge.isEnabled) return
+        // Native hosts have no Flutter overlay to draw a toast, so surface it
+        // from Kotlin. Best-effort: the process is already terminating.
+        runCatching {
+            StackerToast.showCrash(throwable.javaClass.simpleName, fatal = true)
+        }
         runCatching {
             StackerBridge.sendCrash(
                 payloadOf(

@@ -1,10 +1,10 @@
 name: stacker_inspector
 description: "Debug-only network, crash and memory-leak inspector for Flutter, native Android, native iOS and hybrid apps. Chucker-style dashboard, BLoC architecture, GetIt DI."
-version: 0.1.0
-homepage: https://github.com/YOUR_USERNAME/stacker
-repository: https://github.com/YOUR_USERNAME/stacker
-issue_tracker: https://github.com/YOUR_USERNAME/stacker/issues
-documentation: https://github.com/YOUR_USERNAME/stacker#readme
+version: 0.2.0
+homepage: https://github.com/jatinsinghsatija/Stacker
+repository: https://github.com/jatinsinghsatija/Stacker
+issue_tracker: https://github.com/jatinsinghsatija/Stacker/issues
+documentation: https://github.com/jatinsinghsatija/Stacker#readme
 
 # Shown on pub.dev and used for search. Max 5, lowercase, hyphenated.
 topics:

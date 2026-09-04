@@ -5,7 +5,7 @@ group = "com.stacker.stacker"
 // `flutter build aar` overrides this with the value in the generated
 // .android/Flutter/build.gradle, so scripts/jitpack_build.sh stamps that file
 // from the git tag. This value is only what a direct Gradle build produces.
-version = "0.1.0"
+version = "0.2.0"
 
 buildscript {
     val kotlinVersion = "2.3.20"

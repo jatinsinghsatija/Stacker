@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🥞 Stacker
+<img src="doc/stacker_icon.svg" width="96" height="96" alt="Stacker icon" />
+
+# Stacker
 
 **A Chucker-style debug inspector for API calls, crashes, and memory leaks —
 for Flutter, native Android, native iOS, and hybrid apps.**
@@ -11,7 +13,7 @@ for Flutter, native Android, native iOS, and hybrid apps.**
 [![Dart](https://img.shields.io/badge/Dart-%5E3.9-0175C2?logo=dart)](https://dart.dev)
 [![BLoC](https://img.shields.io/badge/state-BLoC-6A1B9A)](https://bloclibrary.dev)
 [![DI](https://img.shields.io/badge/DI-GetIt-00897B)](https://pub.dev/packages/get_it)
-[![Tests](https://img.shields.io/badge/tests-149%20passing-2E7D32)]()
+[![Tests](https://img.shields.io/badge/tests-159%20passing-2E7D32)]()
 [![pub.dev](https://img.shields.io/badge/pub.dev-stacker-0175C2)](https://pub.dev/packages/stacker_inspector)
 [![JitPack](https://img.shields.io/badge/JitPack-native%20Android-brightgreen)](https://jitpack.io)
 [![Release safe](https://img.shields.io/badge/release-auto%20disabled-C62828)]()
@@ -27,8 +29,8 @@ for Flutter, native Android, native iOS, and hybrid apps.**
 | 🌐 **Every API call** | Status code **and what it means**, request/response headers, query params, path params, bodies, timings, sizes |
 | 💥 **Crashes** | Uncaught Flutter, Dart, and native errors with a timestamp and full stack trace |
 | 🧠 **Memory leaks** | Retained-object detection via `WeakReference`, plus resident-memory trend sampling |
-| 🍞 **Live toasts** | Each call raises an in-app toast with its status code and endpoint — **debug only** |
-| 🥞 **Separate launcher icon** | A second app icon that opens the dashboard directly — **debug only** |
+| 🍞 **Live toasts** | Each call raises a toast with its status code and endpoint, on **all three platforms** — **debug only** |
+| 🧭 **Separate launcher icon** | A second app icon that opens the dashboard directly — **debug only** |
 | 🎯 **Intent / deep link** | Open the dashboard from native code any time |
 | 🔒 **Release safe** | Capture, toasts, icon, and timers are all **off** in release builds |
 
@@ -50,7 +52,6 @@ No Flutter SDK required for the native paths — both ship prebuilt binaries.
 - [Integration: Flutter app](#1-flutter-app-2-lines)
 - [Integration: native Android (JitPack)](#2-native-android-kotlinjava--via-jitpack)
 - [Integration: native iOS (CocoaPods)](#3-native-ios-swift--via-cocoapods)
-- [Integration: native iOS (CocoaPods)](#3-native-ios-swift--via-cocoapods)
 - [Integration: hybrid / add-to-app](#4-hybrid--add-to-app)
 - [The debug-only launcher icon](#the-debug-only-launcher-icon)
 - [Opening the dashboard](#opening-the-dashboard)
@@ -69,7 +70,7 @@ No Flutter SDK required for the native paths — both ship prebuilt binaries.
 ```yaml
 # pubspec.yaml
 dependencies:
-  stacker_inspector: ^0.1.0
+  stacker_inspector: ^0.2.0
 ```
 
 ```dart
@@ -123,8 +124,8 @@ MaterialApp(
 )
 ```
 
-This adds the per-call toast stack and the draggable 🔍 bubble that opens the
-dashboard. In release it returns `child` untouched.
+This adds the per-call toast stack and the draggable layers bubble that opens
+the dashboard. In release it returns `child` untouched.
 
 ### Step 3 — attach to your HTTP client
 
@@ -234,15 +235,35 @@ dependencyResolutionManagement {
 ```gradle
 // app/build.gradle
 dependencies {
-    debugImplementation   'com.stacker.stacker:stacker_debug:1.0'
-    debugImplementation   'com.stacker.stacker_host:flutter_debug:1.0'
+    def stacker = 'com.github.jatinsinghsatija.Stacker'
+    def stackerVersion = 'v0.2.0'
+
+    debugImplementation   "$stacker:stacker_inspector_debug:$stackerVersion"
+    debugImplementation   "$stacker:flutter_debug:$stackerVersion"
 
     // Optional. Omit both lines to keep Stacker out of release builds
     // entirely — see "Release builds" below.
-    releaseImplementation 'com.stacker.stacker:stacker_release:1.0'
-    releaseImplementation 'com.stacker.stacker_host:flutter_release:1.0'
+    releaseImplementation "$stacker:stacker_inspector_release:$stackerVersion"
+    releaseImplementation "$stacker:flutter_release:$stackerVersion"
 }
 ```
+
+> ### ⚠️ Do not use the aggregate coordinate
+>
+> JitPack's page will offer you a single line like
+> `com.github.jatinsinghsatija:Stacker:v0.2.0`. **It does not work here.** That
+> coordinate resolves to an aggregate POM listing all four modules, so Gradle
+> pulls the debug *and* release Flutter engines into the same variant and the
+> build fails:
+>
+> ```
+> Execution failed for task ':app:mergeDebugNativeLibs'.
+> > 2 files found with path 'lib/armeabi-v7a/libflutter.so'
+> ```
+>
+> Use the four per-variant lines above instead. Note the group id gains a
+> `.stacker` suffix (`com.github.USER.stacker`, not `com.github.USER`) — that
+> is JitPack's convention for multi-module builds.
 
 That is the whole integration. The launcher icon, the dashboard activity, and
 the icon assets all arrive through manifest merging.
@@ -279,21 +300,50 @@ consume records yourself — see "Capture without the dashboard" below.
 
 ### Step 3 — turn capture on
 
+One call, in your `Application`:
+
 ```kotlin
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
         if (BuildConfig.DEBUG) {
-            StackerCrashHandler.install()   // optional, see the crash caveat
-            StackerActivity.warmUp(this)    // optional, avoids a ~1s first launch
+            StackerAndroid.enable(this)
         }
     }
 }
 ```
 
-Neither call is required for the launcher icon to work — the icon and
-dashboard function on their own. `warmUp` only makes the first open faster.
+`StackerAndroid.enable()` does four things:
+
+1. turns capture on, so the OkHttp interceptor starts recording;
+2. shows a **per-call toast** for every completed request and every crash —
+   the same dark card the Flutter overlay draws;
+3. installs the crash handler;
+4. warms the dashboard's Flutter engine so the first open is instant.
+
+<details>
+<summary>Tuning it</summary>
+
+```kotlin
+StackerAndroid.enable(
+    this,
+    // ALL (default) · ERRORS_ONLY · NONE
+    toastPolicy = StackerToast.Policy.ERRORS_ONLY,
+    // Pass false if you use Crashlytics, Sentry or Bugsnag — see the crash caveat.
+    installCrashHandler = false,
+    // Pass false to skip ~1s of background work at launch.
+    warmUpDashboard = false,
+)
+```
+
+Toasts are drawn from Kotlin, not routed through Flutter, so they appear on
+your native screens whether or not the dashboard has ever been opened. Tapping
+one opens the dashboard on the matching tab.
+</details>
+
+> The launcher icon works without any of this — the icon and dashboard
+> function on their own. `enable()` is what turns on **capture and toasts**.
 
 ### Step 4 — add the OkHttp interceptor
 
@@ -397,7 +447,7 @@ target 'MyApp' do
   use_frameworks!
 
   pod 'StackerInspector',
-      :podspec => 'https://raw.githubusercontent.com/YOUR_USERNAME/stacker/v0.1.0/StackerInspector.podspec',
+      :podspec => 'https://raw.githubusercontent.com/jatinsinghsatija/Stacker/v0.2.0/StackerInspector.podspec',
       :configurations => ['Debug']
 end
 ```
@@ -409,6 +459,20 @@ pod install
 `:configurations => ['Debug']` keeps Stacker out of your release builds
 entirely — the equivalent of Android's `debugImplementation`.
 
+> ### Use the `/Debug` subspec on simulators
+>
+> The pod ships two framework sets and the choice matters:
+>
+> | Subspec | Runs on | Why |
+> |---|---|---|
+> | `StackerInspector/Debug` | **simulator + device** | JIT engine with a Dart kernel blob |
+> | `StackerInspector/Release` | device only | AOT engine; Apple's AOT compiler does not target the simulator |
+>
+> `StackerInspector/Debug` is the default, so plain `pod 'StackerInspector'`
+> also works. Pinning `/Release` and then running on a simulator fails with
+> `Engine run configuration was invalid` and a black dashboard — verified, and
+> the reason both sets are shipped.
+
 <details>
 <summary><b>Requirements — please read</b></summary>
 
@@ -416,7 +480,7 @@ entirely — the equivalent of Android's `debugImplementation`.
 |---|---|---|
 | Deployment target | **iOS 13+** | Flutter engine minimum. |
 | `use_frameworks!` | **required** | The pod vends dynamic XCFrameworks. |
-| First `pod install` | **~81 MB download** | The Flutter engine for device *and* simulator. CocoaPods caches it, so this is a one-time cost per machine. |
+| First `pod install` | **~142 MB download** | Both the Debug (JIT, simulator-capable) and Release (AOT) framework sets. CocoaPods caches it, so this is a one-time cost per machine. |
 | Xcode | 15+ | |
 
 If a `:configurations => ['Debug']` pod is not viable for your setup, see
@@ -527,6 +591,24 @@ capture stays off until `StackerAutoAttach.enable()` is called, so guarding
 that one call with `#if DEBUG` is sufficient. The bubble and shake gesture are
 both no-ops while capture is disabled.
 
+### If the dashboard renders letterboxed
+
+If the dashboard (or your whole app) appears inset with black bands top and
+bottom, your app is running in iOS **compatibility mode** — a legacy 4.7"
+canvas — not full screen. This is an app-level setting, not something Stacker
+controls.
+
+Your `Info.plist` needs a launch-screen declaration. Modern apps use:
+
+```xml
+<key>UILaunchScreen</key>
+<dict/>
+```
+
+Older projects use `UILaunchStoryboardName` pointing at a storyboard. With
+neither key present, iOS letterboxes the app and every view inside it,
+including the dashboard.
+
 ### Debugging note
 
 Flutter needs an LLDB init file to debug correctly when embedded on recent iOS
@@ -566,9 +648,15 @@ library's own `debug` source set, so it merges into your app the moment you
 add the dependency. Add Stacker, build a debug APK, and a second icon appears
 on the home screen.
 
+<img src="doc/stacker_icon.svg" width="56" height="56" align="left" hspace="12" alt="" />
+
 The `@mipmap/ic_stacker_launcher` icon ships with the library — three offset
 plates under a magnifier, so the stack reads at launcher size and is never
-mistaken for your own app icon.
+mistaken for your own app icon. The mark above is the same artwork
+(`doc/stacker_icon.svg`), generated from the launcher vector so the two cannot
+drift apart.
+
+<br clear="left" />
 
 Two independent safeguards keep it out of production:
 
@@ -631,7 +719,7 @@ The substitutes, all debug-gated:
 | iOS (native) | `StackerAutoAttach.openDashboard(initialTab: "api")` |
 | iOS — shake | shake the device, after `StackerAutoAttach.enable()` |
 | iOS — bubble | tap the floating button |
-| In-app bubble | Tap the 🥞 layers button (from `StackerOverlay`) |
+| In-app bubble | Tap the layers button (from `StackerOverlay`) |
 | Launcher | Tap the Stacker launcher icon (Android debug) |
 | A toast | Tap it to jump to that record |
 | As a route | `MaterialPageRoute(builder: (_) => const StackerDashboard())` |
@@ -916,7 +1004,7 @@ StackerLocator.get<ApiListBloc>();          // factory — fresh per route
 
 ### Testing
 
-149 tests, all passing:
+159 tests, all passing:
 
 ```
 ring_buffer          10   capacity, eviction, in-place replacement
@@ -930,6 +1018,7 @@ dio_interceptor      14   against a real loopback HTTP server
 http_client           8   stream re-emission verified
 service_locator      12   DI wiring, isolation, hot restart
 overlay_navigation    4   both dashboard entry points actually navigate
+overlay_toast        10   toast content, policies, capping, tap-to-open
 dashboard_widget     17   full UI, navigation, empty states
 ```
 
@@ -1022,10 +1111,11 @@ balloon memory. Raise it if you need more, or expect binary payloads to show as
 <details>
 <summary><b>iOS: <code>pod install</code> is slow or the download is huge</b></summary>
 
-Expected. The pod is ~81 MB because it carries the Flutter engine for both
-device and simulator. CocoaPods caches it per machine, so only the first
-`pod install` pays that cost. Subsequent projects on the same machine reuse
-the cache.
+Expected. The pod is ~142 MB because it carries **two** complete framework
+sets: Debug (JIT, the only one that runs on a simulator) and Release (AOT, for
+device builds). Shipping Release alone would black-screen every simulator, so
+both are required. CocoaPods caches it per machine, so only the first
+`pod install` pays that cost.
 </details>
 
 <details>
@@ -1067,9 +1157,9 @@ One repository, three channels:
 
 | Channel | Command | Notes |
 |---|---|---|
-| **pub.dev** | `flutter pub publish` | Permanent — a version can never be reused. Publish `0.1.0-dev.1` first. |
-| **JitPack** | `git tag v0.1.0 && git push origin v0.1.0` | Builds on demand; nothing to upload. First build takes 10–20 min. |
-| **CocoaPods** | `./scripts/build_ios_frameworks.sh 0.1.0` | Attach the resulting ~81 MB zip to the GitHub Release. |
+| **pub.dev** | `flutter pub publish` | Permanent — a version can never be reused. Publish `0.2.0-dev.1` first. |
+| **JitPack** | `git tag v0.2.0 && git push origin v0.2.0` | Builds on demand; nothing to upload. First build takes 10–20 min. |
+| **CocoaPods** | `./scripts/build_ios_frameworks.sh 0.2.0` | Attach the resulting ~142 MB zip to the GitHub Release. |
 
 Quick pre-flight:
 

@@ -56,6 +56,17 @@ import UIKit
             return
         }
 
+        // A FlutterEngine renders into exactly one FlutterViewController at a
+        // time. The previous controller is dismissed but still holds the
+        // engine, so a second present would attach a controller with no
+        // rendering surface and show a black screen. Verified on a native host:
+        // the first open worked, the second was blank. Releasing the old
+        // controller first hands the surface over cleanly.
+        if let stale = presentedController {
+            stale.view.removeFromSuperview()
+            presentedController = nil
+        }
+
         let engine = ensureEngine(initialRoute: "/stacker/\(initialTab)")
         let controller = FlutterViewController(
             engine: engine,

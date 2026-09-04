@@ -35,7 +35,10 @@ import UIKit
     ///
     /// - Parameter showBubble: pass `false` for the shake gesture only, when
     ///   a persistent on-screen button would get in the way of UI work.
-    @objc public static func enable(showBubble: Bool = true) {
+    @objc public static func enable(
+        showBubble: Bool = true,
+        toastPolicy: StackerToast.Policy = .all
+    ) {
         guard !isEnabled else { return }
         isEnabled = true
 
@@ -43,6 +46,10 @@ import UIKit
         // StackerURLProtocol and StackerCrashHandler start recording.
         StackerBridge.shared.setEnabled(true)
         StackerURLProtocol.registerGlobally()
+
+        // Toasts default to every call so a native integrator gets immediate
+        // feedback that capture is wired up — the most common first question.
+        StackerToast.configure(policy: toastPolicy)
 
         UIWindow.stackerInstallShakeHook()
 
@@ -61,6 +68,7 @@ import UIKit
     @objc public static func disable() {
         guard isEnabled else { return }
         isEnabled = false
+        StackerToast.disable()
         bubble?.hide()
         bubble = nil
         StackerURLProtocol.unregisterGlobally()

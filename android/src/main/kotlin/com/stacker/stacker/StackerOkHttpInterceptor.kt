@@ -110,6 +110,14 @@ class StackerOkHttpInterceptor @JvmOverloads constructor(
                     },
                 )
             }
+            runCatching {
+                StackerToast.showApiCall(
+                    method = request.method,
+                    path = request.url.encodedPath,
+                    statusCode = null,
+                    durationMs = System.currentTimeMillis() - requestTime,
+                )
+            }
             throw error
         }
 
@@ -133,6 +141,19 @@ class StackerOkHttpInterceptor @JvmOverloads constructor(
                     put("responseContentType", response.body?.contentType()?.toString())
                     put("responseSizeBytes", response.body?.contentLength()?.toInt() ?: -1)
                 },
+            )
+        }
+
+        // Per-call toast for native hosts. In a Flutter app `StackerOverlay`
+        // draws these, but a native app has no Flutter widget tree on screen,
+        // so the toast has to come from Kotlin. No-op unless the host called
+        // StackerAndroid.enable().
+        runCatching {
+            StackerToast.showApiCall(
+                method = request.method,
+                path = request.url.encodedPath,
+                statusCode = response.code,
+                durationMs = System.currentTimeMillis() - requestTime,
             )
         }
 

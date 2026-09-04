@@ -5,7 +5,7 @@ publish_to: "none"
 # Keep this in step with the root `stacker` package version and with the
 # JitPack release tag, so a developer reading `com.github.<you>:stacker:v0.1.0`
 # knows exactly which dashboard build they have.
-version: 0.1.0+1
+version: 0.2.0+1
 
 environment:
   sdk: ^3.9.0

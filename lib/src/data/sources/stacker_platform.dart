@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -29,9 +31,20 @@ class StackerPlatform {
   /// The stream is `broadcast` on the native side; each event is a map with a
   /// `type` discriminator of `api`, `crash`, or `leak`.
   Stream<NativeRecordEvent> get nativeRecords {
-    return _events.receiveBroadcastStream().map(_parseEvent).where(
-          (event) => event != null,
-        ).cast<NativeRecordEvent>();
+    try {
+      return _events
+          .receiveBroadcastStream()
+          .handleError(
+            // A host that is absent or misbehaving must not tear down the
+            // Dart-side subscription; capture from Dart keeps working.
+            (Object error) => debugPrint('[Stacker] native stream: $error'),
+          )
+          .map(_parseEvent)
+          .where((event) => event != null)
+          .cast<NativeRecordEvent>();
+    } on MissingPluginException {
+      return const Stream<NativeRecordEvent>.empty();
+    }
   }
 
   /// Reports the Dart-side capture state to the host so the native
@@ -101,10 +114,30 @@ class StackerPlatform {
   /// the library is used on a platform without a native implementation
   /// (unit tests, desktop, web). Capture keeps working; only the native
   /// extras are unavailable.
+  /// How long to wait for the host before giving up on a call.
+  ///
+  /// A method channel with no handler on the other side never replies — it
+  /// does not throw. In `flutter_test` there is no host at all, so without a
+  /// timeout `Stacker.init` hangs until the test framework kills the run after
+  /// ten minutes. That was a real defect: any app that called `Stacker.init`
+  /// from its own widget test froze with no useful error.
+  ///
+  /// A real host answers these calls in single-digit milliseconds, so 2s is
+  /// generous while still failing fast when nobody is listening.
+  static const Duration _callTimeout = Duration(seconds: 2);
+
   Future<T?> _invoke<T>(String name, [Map<String, Object?>? args]) async {
     try {
-      return await _method.invokeMethod<T>(name, args);
+      return await _method
+          .invokeMethod<T>(name, args)
+          .timeout(_callTimeout);
     } on MissingPluginException {
+      // No native implementation: unit tests, desktop, web. Capture keeps
+      // working; only the native extras are unavailable.
+      return null;
+    } on TimeoutException {
+      // No host is listening. Silent by design — this is the normal case in a
+      // widget test and must not spam the console on every call.
       return null;
     } on PlatformException catch (error) {
       debugPrint('[Stacker] platform call "$name" failed: ${error.message}');
