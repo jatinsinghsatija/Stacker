@@ -217,6 +217,8 @@ app's own icon; tapping it opens the full Stacker dashboard.
 
 ### Step 1 — add the repository
 
+This is the only change your `settings.gradle` needs.
+
 ```gradle
 // settings.gradle
 dependencyResolutionManagement {
@@ -268,30 +270,30 @@ dependencies {
 That is the whole integration. The launcher icon, the dashboard activity, and
 the icon assets all arrive through manifest merging.
 
-> **Why `1.0` and not the release number?** `flutter build aar` always stamps
-> its output as Maven version `1.0` — this is a Flutter toolchain behaviour,
-> not a Stacker choice. You select a *release* with the JitPack tag, which
-> pins which immutable build you resolve:
->
-> ```gradle
-> dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        maven { 
-            url 'https://jitpack.io'
-            content {includeGroupByRegex 'com.github.jatinsinghsatija.*'}
-               }
-        maven { 
-            url 'https://storage.googleapis.com/download.flutter.io'
-            content {includeGroupByRegex 'io.flutter.*'}
-               }
-         }
+<details>
+<summary><b>Optional: speed up dependency resolution</b></summary>
+
+**You do not need this.** Step 1 is complete on its own — this only swaps the
+two `maven { … }` lines you already added for filtered versions.
+
+By default Gradle asks every declared repository about every dependency. These
+filters say that only Stacker and the Flutter engine live in these two, so
+Gradle stops querying them for your other libraries:
+
+```gradle
+// settings.gradle — replaces the two maven { } lines from Step 1
+maven {
+    url 'https://jitpack.io'
+    content { includeGroupByRegex 'com\\.github\\.jatinsinghsatija.*' }
 }
-> ```
->
-> To move between Stacker releases, change the tag JitPack builds (see the
-> JitPack page for the repo), not the `1.0` in these lines.
+maven {
+    url 'https://storage.googleapis.com/download.flutter.io'
+    content { includeGroupByRegex 'io\\.flutter.*' }
+}
+```
+
+Keep `google()` and `mavenCentral()` exactly as they are.
+</details>
 
 <details>
 <summary><b>Requirements — please read, these are not optional</b></summary>
