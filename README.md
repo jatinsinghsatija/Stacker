@@ -287,7 +287,7 @@ the icon assets all arrive through manifest merging.
             content {includeGroupByRegex 'io.flutter.*'}
                }
          }
-      }
+}
 > ```
 >
 > To move between Stacker releases, change the tag JitPack builds (see the
