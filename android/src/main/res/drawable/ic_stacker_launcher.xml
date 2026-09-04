@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Pre-API-26 fallback for the Stacker launcher icon.
+
+  Devices on API 26+ resolve @mipmap/ic_stacker_launcher to the adaptive icon
+  in mipmap-anydpi-v26; older devices land here. Same artwork, with the
+  background baked in and a rounded plate instead of a launcher-applied mask.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Rounded background plate. -->
+    <path
+        android:fillColor="#0B1220"
+        android:pathData="M12,0 L96,0 A12,12 0 0,1 108,12 L108,96 A12,12 0 0,1 96,108 L12,108 A12,12 0 0,1 0,96 L0,12 A12,12 0 0,1 12,0 Z" />
+
+    <!-- Three stacked plates, largest at the bottom. -->
+    <path
+        android:fillColor="#1A3A8F"
+        android:pathData="M54,86 L20,72 L54,58 L88,72 Z" />
+    <path
+        android:fillColor="#2962FF"
+        android:pathData="M54,69 L25,57 L54,45 L83,57 Z" />
+    <path
+        android:fillColor="#5B8DEF"
+        android:pathData="M54,52 L30,42 L54,32 L78,42 Z" />
+
+    <!-- Magnifier. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M58,26 m-9.5,0 a9.5,9.5 0 1,0 19,0 a9.5,9.5 0 1,0 -19,0 Z" />
+    <path
+        android:fillColor="#2962FF"
+        android:pathData="M58,26 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64.5,32.5 L72,40 L68.4,43.6 L60.9,36.1 Z" />
+</vector>

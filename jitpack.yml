@@ -1,0 +1,16 @@
+# JitPack build configuration for Stacker.
+#
+# JitPack's images do not ship the Flutter SDK, and the Stacker dashboard is
+# compiled Dart — so the build has to install Flutter first, then hand over to
+# `flutter build aar`, which emits the engine and the AOT Dart as ordinary
+# Maven artifacts alongside the Kotlin AAR.
+#
+# `install:` replaces JitPack's default Gradle invocation entirely, so this
+# script is fully responsible for getting artifacts into the local Maven repo
+# that JitPack then harvests.
+
+jdk:
+  - openjdk17
+
+install:
+  - ./scripts/jitpack_build.sh

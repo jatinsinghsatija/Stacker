@@ -1,0 +1,46 @@
+# Files excluded from the pub.dev archive.
+#
+# Pub falls back to .gitignore when this file is absent, but that is not enough
+# here: `flutter pub publish` still picked up a stray top-level build/ folder
+# and the Flutter module, inflating the archive from ~130 KB to 15 MB.
+#
+# Anything a *consumer* of the package does not need should be listed here.
+# The Android and iOS platform sources are deliberately NOT excluded — they are
+# the plugin implementation and must ship.
+
+# Build output.
+build/
+.dart_tool/
+.gradle/
+
+# The example app is useful on pub.dev, but its build artifacts are not.
+example/build/
+example/.dart_tool/
+example/.gradle/
+example/android/.gradle/
+example/ios/Pods/
+example/ios/.symlinks/
+example/ios/Flutter/ephemeral/
+example/ios/Runner.xcworkspace/
+example/**/*.lock
+
+# The Flutter module exists only to produce the native Android AAR and the iOS
+# XCFramework for JitPack and CocoaPods. Flutter apps installing from pub.dev
+# never need it, and it is by far the largest directory in the repository.
+stacker_host/
+
+# Maintainer tooling, not part of the published package.
+scripts/
+jitpack.yml
+.github/
+
+# Editor and OS noise.
+.idea/
+*.iml
+.DS_Store
+
+# Native-iOS release artifacts and the native-iOS podspec. Flutter apps
+# installing from pub.dev use ios/stacker.podspec, not the root Stacker.podspec.
+dist/
+Stacker.podspec
+RELEASE.md

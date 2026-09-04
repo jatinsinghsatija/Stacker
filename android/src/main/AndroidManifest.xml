@@ -1,0 +1,28 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+
+        <!--
+          Hosts the Stacker dashboard.
+
+          Declared here in the library manifest so a host app gets it through
+          manifest merging without copying anything. `exported="false"` keeps
+          other apps from launching the dashboard; the host app's own code can
+          still start it with an explicit intent.
+
+          The launcher *alias* that puts a second icon on the home screen is
+          declared in `src/debug/AndroidManifest.xml` instead, so it ships
+          only in the debug AAR and is physically absent from release builds.
+        -->
+        <activity
+            android:name="com.stacker.stacker.StackerActivity"
+            android:exported="false"
+            android:label="Stacker"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:theme="@style/StackerTheme"
+            android:windowSoftInputMode="adjustResize" />
+
+    </application>
+
+</manifest>

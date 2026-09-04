@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon for the Stacker dashboard launcher entry (API 26+).
+
+  Pre-26 devices fall back to the plain drawable of the same name, declared
+  in res/drawable, so the icon renders on every supported API level.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_stacker_background" />
+    <foreground android:drawable="@drawable/ic_stacker_foreground" />
+</adaptive-icon>

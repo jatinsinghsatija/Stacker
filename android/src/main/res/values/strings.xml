@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Label shown under the Stacker launcher icon.
+
+      Declared in the library so the alias resolves without the host app
+      adding anything. A host that wants a different label can override this
+      string resource in its own `src/debug/res/values/strings.xml`.
+    -->
+    <string name="stacker_launcher_label">Stacker</string>
+</resources>

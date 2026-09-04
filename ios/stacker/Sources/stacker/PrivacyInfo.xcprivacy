@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Privacy manifest for the Stacker plugin.
+
+  All four arrays are intentionally empty, and each is a positive claim rather
+  than an oversight:
+
+  * NSPrivacyTracking / NSPrivacyTrackingDomains — Stacker performs no
+    tracking and contacts no network endpoint of its own. It only observes
+    traffic the host app was already making.
+
+  * NSPrivacyCollectedDataTypes — nothing leaves the device. Captured records
+    live in an in-memory ring buffer for the process lifetime and are never
+    written to disk or transmitted.
+
+  * NSPrivacyAccessedAPITypes — Stacker uses none of Apple's four
+    required-reason API categories (file timestamps, UserDefaults, disk
+    space, or system boot time). Memory sampling goes through Dart's
+    ProcessInfo.currentRss, which is backed by mach_task_basic_info and is
+    not a required-reason API.
+
+  Re-check this file if capture is ever changed to persist records, since
+  writing to disk would introduce file-timestamp API usage.
+-->
+<plist version="1.0">
+<dict>
+	<key>NSPrivacyTracking</key>
+	<false/>
+	<key>NSPrivacyTrackingDomains</key>
+	<array/>
+	<key>NSPrivacyCollectedDataTypes</key>
+	<array/>
+	<key>NSPrivacyAccessedAPITypes</key>
+	<array/>
+</dict>
+</plist>

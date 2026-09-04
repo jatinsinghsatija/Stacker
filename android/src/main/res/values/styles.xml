@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+      Theme for StackerActivity.
+
+      A plain DayNight theme with no action bar: the dashboard draws its own
+      Material 3 app bar, and inheriting the host app's branded theme could
+      make the inspector unreadable.
+    -->
+    <style name="StackerTheme" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+</resources>

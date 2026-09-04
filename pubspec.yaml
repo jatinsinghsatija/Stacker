@@ -1,0 +1,54 @@
+name: stacker_inspector
+description: "Debug-only network, crash and memory-leak inspector for Flutter, native Android, native iOS and hybrid apps. Chucker-style dashboard, BLoC architecture, GetIt DI."
+version: 0.1.0
+homepage: https://github.com/YOUR_USERNAME/stacker
+repository: https://github.com/YOUR_USERNAME/stacker
+issue_tracker: https://github.com/YOUR_USERNAME/stacker/issues
+documentation: https://github.com/YOUR_USERNAME/stacker#readme
+
+# Shown on pub.dev and used for search. Max 5, lowercase, hyphenated.
+topics:
+  - networking
+  - debugging
+  - devtools
+  - logging
+  - bloc
+
+environment:
+  sdk: ^3.9.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.1.8
+
+  # State management: BLoC with explicit events and states.
+  bloc: ^9.0.0
+  flutter_bloc: ^9.1.0
+  equatable: ^2.0.7
+
+  # Dependency injection.
+  get_it: ^8.0.3
+
+  # HTTP clients that Stacker can attach to. Both are direct dependencies
+  # because the library ships an interceptor for each; an app that uses only
+  # one of them still resolves the other but never instantiates it.
+  dio: ^5.7.0
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.stacker.stacker
+        pluginClass: StackerPlugin
+      ios:
+        pluginClass: StackerPlugin

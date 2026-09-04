@@ -1,0 +1,38 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+
+        <!--
+          The separate Stacker launcher icon.
+
+          This lives in the library's `debug` source set, so it is compiled
+          into the debug AAR and merged into the host app automatically — a
+          native developer adds the Gradle dependency and gets a second icon
+          with no manifest edits of their own.
+
+          Because it is a `debug`-only source set, the release AAR never
+          contains this file. That is the primary guarantee that the icon
+          cannot reach production: it is absent from the artifact, not merely
+          disabled at runtime. `StackerPlugin.setLauncherIconVisible` adds a
+          second, independent runtime check against FLAG_DEBUGGABLE.
+
+          `targetActivity` points at the dashboard host declared in the main
+          manifest. The icon and label are Stacker's own, so the entry is
+          visually distinct from the host app's launcher icon.
+        -->
+        <activity-alias
+            android:name="com.stacker.stacker.StackerLauncherAlias"
+            android:targetActivity="com.stacker.stacker.StackerActivity"
+            android:label="@string/stacker_launcher_label"
+            android:icon="@mipmap/ic_stacker_launcher"
+            android:roundIcon="@mipmap/ic_stacker_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+    </application>
+
+</manifest>
