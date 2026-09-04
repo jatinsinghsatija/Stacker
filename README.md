@@ -274,10 +274,20 @@ the icon assets all arrive through manifest merging.
 > pins which immutable build you resolve:
 >
 > ```gradle
-> maven {
->     url 'https://jitpack.io'
->     content { includeGroupByRegex 'com\\.stacker.*' }
-> }
+> dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { 
+            url 'https://jitpack.io'
+            content {includeGroupByRegex 'com.github.jatinsinghsatija.*'}
+               }
+        maven { 
+            url 'https://storage.googleapis.com/download.flutter.io'
+            content {includeGroupByRegex 'io.flutter.*'}
+               }
+         }
+      }
 > ```
 >
 > To move between Stacker releases, change the tag JitPack builds (see the
